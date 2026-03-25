@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>เข้าสู่ระบบ - Java Master</title>
+    <link rel="stylesheet" href="style.css"> </head>
+<body>
+
+    <div class="animated-bg"></div> <div class="glass-container">
+        <div class="glass-box">
+            <h2>Welcome Back</h2>
+            <p style="color: #ddd; margin-bottom: 30px;">เข้าสู่ระบบเพื่อเรียนต่อ</p>
+            
+            <input type="text" id="username" placeholder="ชื่อผู้ใช้งาน (Username)">
+            <input type="password" id="password" placeholder="รหัสผ่าน (Password)">
+            
+            <button onclick="login()">เข้าสู่ระบบ</button>
+            
+            <p style="margin-top: 20px; font-size: 0.9em;">
+                ยังไม่มีบัญชี? <a href="register.html">สมัครสมาชิกที่นี่</a>
+            </p>
+            <p style="margin-top: 10px;">
+                <a href="home.html" style="font-size: 0.8em; color: #ccc;">← กลับหน้าหลัก</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // เอฟเฟกต์ปุ่มกำลังโหลด
+            const btn = document.querySelector('button');
+            btn.innerHTML = 'กำลังตรวจสอบ...';
+            btn.style.opacity = '0.7';
+
+            fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            })
+            .then(res => res.json())
+            .then(data => {
+    if (data.success) {
+        // 1. บันทึกข้อมูล user ลงเครื่อง
+        localStorage.setItem('user', JSON.stringify(data.user));
+
+        // 2. เช็คสถานะ (Role) แล้วพาไปคนละหน้า
+        if (data.user.role === 'admin') {
+            // 👮 ถ้าเป็นแอดมิน -> ไปหลังบ้านเลย
+            window.location.href = 'admin_dashboard.html';
+        } else {
+            // 👨‍🎓 ถ้าเป็นนักเรียน -> ไปหน้าแรกปกติ
+            window.location.href = 'home.html';
+        }
+        
+    } else {
+        alert("❌ " + data.message);
+        btn.innerHTML = 'เข้าสู่ระบบ';
+        btn.style.opacity = '1';
+    }
+})
+            .catch(err => alert('เชื่อมต่อ Server ไม่ได้'));
+        }
+    </script>
+</body>
+</html>

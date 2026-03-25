@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Java Master</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #e9efec; }
+
+        /* Header zone */
+        .page-header {
+            background: #16423c;
+            padding: 40px;
+            margin-bottom: 0;
+        }
+        .page-header-inner {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .page-header .greeting-label {
+            font-size: 0.75rem; font-weight: 600; letter-spacing: 0.18em;
+            text-transform: uppercase; color: #6a9c89;
+            margin-bottom: 8px;
+        }
+        .page-header h1 {
+            font-size: 1.9rem; font-weight: 600;
+            color: #e9efec; margin: 0;
+            letter-spacing: -0.01em;
+        }
+        .page-header p {
+            font-size: 0.9rem; color: #6a9c89;
+            margin: 6px 0 0;
+        }
+
+        /* Main content */
+        .main-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 32px 40px 40px;
+        }
+
+        /* Stat cards */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+            margin-top: -28px;
+        }
+        .stat-card {
+            background: white;
+            padding: 0;
+            border-radius: 12px;
+            border: 1px solid #c4dad2;
+            overflow: hidden;
+            transition: box-shadow 0.25s, transform 0.25s;
+            position: relative;
+        }
+        .stat-card:hover {
+            box-shadow: 0 8px 24px rgba(22,66,60,0.1);
+            transform: translateY(-2px);
+        }
+        .stat-card-accent {
+            height: 3px;
+            background: #16423c;
+        }
+        .stat-card:nth-child(2) .stat-card-accent { background: #6a9c89; }
+        .stat-card:nth-child(3) .stat-card-accent { background: #c4dad2; border-bottom: 1px solid #b0ccc3; }
+        .stat-card-body {
+            padding: 22px 26px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        .stat-label {
+            font-size: 0.7rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.14em;
+            color: #6a9c89; margin: 0 0 8px;
+        }
+        .stat-value {
+            font-size: 2.4rem; font-weight: 700;
+            color: #16423c; line-height: 1;
+            letter-spacing: -0.02em;
+        }
+        .stat-sub {
+            font-size: 0.75rem; color: #6a9c89;
+            margin-top: 6px;
+        }
+        .stat-icon-wrap {
+            width: 40px; height: 40px;
+            background: #e9efec;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            margin-bottom: 2px;
+        }
+        .stat-icon-wrap i { font-size: 1rem; color: #6a9c89; }
+
+        /* Course list */
+        .course-list {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #c4dad2;
+            overflow: hidden;
+            margin-bottom: 28px;
+        }
+        .course-list-header {
+            padding: 20px 28px;
+            border-bottom: 1px solid #c4dad2;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .course-list-header i { color: #6a9c89; font-size: 0.95rem; }
+        .course-list-header span {
+            font-size: 0.85rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.1em;
+            color: #16423c;
+        }
+        .list-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px 28px;
+            border-bottom: 1px solid #e9efec;
+            transition: background 0.15s;
+        }
+        .list-item:last-child { border-bottom: none; }
+        .list-item:hover { background: #f5f8f7; }
+        .lesson-number {
+            font-size: 0.72rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.12em;
+            color: #6a9c89; margin-bottom: 3px;
+        }
+        .lesson-title {
+            font-size: 0.95rem; font-weight: 500;
+            color: #16423c;
+        }
+        .quiz-btn {
+            font-size: 0.8rem; font-weight: 600;
+            color: #16423c; text-decoration: none;
+            padding: 7px 16px;
+            border: 1px solid #c4dad2;
+            border-radius: 6px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .quiz-btn:hover {
+            background: #16423c; color: #e9efec;
+            border-color: #16423c;
+            text-decoration: none;
+        }
+
+        /* Bottom CTA */
+        .cta-row {
+            display: flex; justify-content: center;
+        }
+        .cta-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 28px; border-radius: 8px;
+            background: #16423c; color: #e9efec;
+            font-size: 0.9rem; font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            letter-spacing: 0.02em;
+        }
+        .cta-btn:hover {
+            background: #0f2e2a; transform: translateY(-1px);
+            text-decoration: none; color: #e9efec;
+        }
+        .cta-btn i { font-size: 0.8rem; }
+
+        /* Navbar overrides */
+        #user-display {
+            font-size: 0.85rem; font-weight: 500;
+            color: #c4dad2; letter-spacing: 0.03em;
+        }
+        #user-display i { margin-right: 6px; color: #6a9c89; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo">Java <span>Master</span></div>
+        <div id="user-display">...</div>
+    </nav>
+
+    <div class="page-header">
+        <div class="page-header-inner">
+            <div class="greeting-label">ภาพรวมการเรียน</div>
+            <h1>สวัสดี, <span id="name-header">...</span></h1>
+            <p>ติดตามความคืบหน้าและทำแบบฝึกหัดท้ายบทได้ที่นี่</p>
+        </div>
+    </div>
+
+    <div class="main-content">
+
+        <div class="dashboard-grid">
+            <div class="stat-card">
+                <div class="stat-card-accent"></div>
+                <div class="stat-card-body">
+                    <div>
+                        <p class="stat-label">บทเรียนที่จบแล้ว</p>
+                        <div class="stat-value" id="stat-completed">—</div>
+                        <div class="stat-sub" id="stat-completed-sub"> </div>
+                    </div>
+                    <div class="stat-icon-wrap">
+                        <i class="fas fa-check"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-accent"></div>
+                <div class="stat-card-body">
+                    <div>
+                        <p class="stat-label">คะแนนรวม</p>
+                        <div class="stat-value" id="stat-score">—</div>
+                        <div class="stat-sub">คะแนนสะสม</div>
+                    </div>
+                    <div class="stat-icon-wrap">
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-accent"></div>
+                <div class="stat-card-body">
+                    <div>
+                        <p class="stat-label">เกรดเฉลี่ย</p>
+                        <div class="stat-value" id="stat-grade">—</div>
+                        <div class="stat-sub" id="stat-grade-sub"> </div>
+                    </div>
+                    <div class="stat-icon-wrap">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="course-list">
+            <div class="course-list-header">
+                <i class="fas fa-list"></i>
+                <span>คอร์สเรียนทั้งหมด</span>
+            </div>
+            <div id="progress-list">
+                <div class="list-item">
+                    <span style="color:#6a9c89; font-size:0.9rem;">กำลังโหลด...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="cta-row">
+            <a href="home.html" class="cta-btn">
+                <i class="fas fa-arrow-left"></i> กลับหน้าหลัก
+            </a>
+        </div>
+    </div>
+
+    <script>
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user) window.location.href = 'login.html';
+
+        document.getElementById('user-display').innerHTML =
+            `<i class="fas fa-user-circle"></i>${user.username}`;
+        document.getElementById('name-header').innerText = user.username;
+
+        fetch(`/api/dashboard/${user.id}`)
+            .then(res => res.json())
+            .then(data => {
+                const completed = data.completed ?? 0;
+                const score = data.total_score ?? 0;
+                document.getElementById('stat-completed').innerText = completed;
+                document.getElementById('stat-completed-sub').innerText =
+                    completed === 0 ? 'ยังไม่ได้เริ่ม' : `จากทั้งหมด`;
+
+                document.getElementById('stat-score').innerText = score;
+
+                const grade = score >= 90 ? 'A' : score >= 75 ? 'B' : score >= 60 ? 'C' : score > 0 ? 'D' : '—';
+                const gradeDesc = { A:'ดีเยี่ยม', B:'ดี', C:'พอใช้', D:'ต้องปรับปรุง', '—':'ยังไม่มีข้อมูล' };
+                document.getElementById('stat-grade').innerText = grade;
+                document.getElementById('stat-grade-sub').innerText = gradeDesc[grade] ?? '';
+            });
+
+        fetch('/api/lessons')
+            .then(res => res.json())
+            .then(lessons => {
+                const list = document.getElementById('progress-list');
+                if (lessons.length === 0) {
+                    list.innerHTML = '<div class="list-item"><span style="color:#6a9c89;">ยังไม่มีบทเรียน</span></div>';
+                    return;
+                }
+                list.innerHTML = lessons.map(l => `
+                    <div class="list-item">
+                        <div>
+                            <div class="lesson-number">บทที่ ${String(l.id).padStart(2,'0')}</div>
+                            <div class="lesson-title">${l.title}</div>
+                        </div>
+                        <a href="quiz.html?lessonId=${l.id}" class="quiz-btn">
+                            ทำแบบฝึกหัด <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i>
+                        </a>
+                    </div>
+                `).join('');
+            });
+    </script>
+</body>
+</html>

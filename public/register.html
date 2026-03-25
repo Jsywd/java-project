@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>สมัครสมาชิก - Java Master</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="animated-bg"></div>
+
+    <div class="glass-container">
+        <div class="glass-box">
+            <h2>Create Account</h2>
+            <p style="color: #ddd; margin-bottom: 20px;">เริ่มต้นเรียนเขียนโปรแกรมฟรี</p>
+            
+            <input type="text" id="username" placeholder="ตั้งชื่อผู้ใช้">
+            <input type="email" id="email" placeholder="อีเมลของคุณ">
+            <input type="password" id="password" placeholder="ตั้งรหัสผ่าน">
+            <input type="password" id="confirm_password" placeholder="ยืนยันรหัสผ่าน">
+            
+            <button onclick="register()">สมัครสมาชิก</button>
+            
+            <p style="margin-top: 20px; font-size: 0.9em;">
+                มีบัญชีแล้ว? <a href="login.html">เข้าสู่ระบบ</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function register() {
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirm = document.getElementById('confirm_password').value;
+
+            if(password !== confirm) { alert("รหัสผ่านไม่ตรงกัน"); return; }
+
+            fetch('/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, email, password })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert("✅ สมัครสำเร็จ! กรุณาเข้าสู่ระบบ");
+                    window.location.href = 'login.html';
+                } else {
+                    alert("❌ " + data.message);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

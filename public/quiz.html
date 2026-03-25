@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>แบบฝึกหัด - Java Master</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .quiz-container {
+            max-width: 700px; margin: 40px auto;
+            background: white; padding: 40px;
+            border-radius: 20px; box-shadow: var(--shadow);
+        }
+        .question-box {
+            margin-bottom: 30px; padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .question-text { font-size: 1.2rem; font-weight: 600; margin-bottom: 15px; color: var(--text-main); }
+        
+        /* Custom Radio Button ให้สวยๆ */
+        .option-label {
+            display: block; padding: 12px 15px; margin: 8px 0;
+            background: #f8f9fa; border-radius: 10px; cursor: pointer;
+            transition: 0.2s; border: 2px solid transparent;
+        }
+        .option-label:hover { background: #e9ecef; }
+        input[type="radio"]:checked + span { color: var(--primary); font-weight: bold; }
+        input[type="radio"]:checked + span::before { content: "✔ "; }
+        
+        /* ซ่อนปุ่ม Radio เดิม */
+        input[type="radio"] { display: none; } 
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="home.html" class="back-btn">← ยกเลิก</a>
+        <span style="font-weight: bold;">📝 Quiz Time</span>
+        <div></div>
+    </nav>
+
+    <div class="quiz-container">
+        <h1 style="text-align: center; margin-bottom: 40px;">แบบฝึกหัดทบทวน</h1>
+        
+        <form id="quiz-form">
+            <div id="questions-area">กำลังโหลดโจทย์...</div>
+            <button type="button" onclick="submitQuiz()" style="margin-top: 30px;">ส่งคำตอบ</button>
+        </form>
+
+    </div>
+
+    <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const lessonId = urlParams.get('lessonId');
+    let currentQuizzes = [];
+
+    // ดึงโจทย์
+    fetch(`/api/quizzes/${lessonId}`)
+        .then(res => res.json())
+        .then(data => {
+            currentQuizzes = data;
+            const area = document.getElementById('questions-area');
+            area.innerHTML = '';
+
+            if (data.length === 0) {
+                area.innerHTML = '<p>ยังไม่มีโจทย์</p>'; return;
+            }
+
+            data.forEach((q, index) => {
+                let html = `<div class="question-box">`;
+                
+                // --- กรณี 1: แบบ Drag & Drop ---
+                if (q.type === 'drag_drop') {
+                    html += `
+                        <div class="question-text">${index + 1}. ${q.question_text}</div>
+                        <div class="code-exercise-box">
+                            <div class="code-display">
+                                ${q.code_snippet.replace('____', `<span class="drop-zone" id="drop-${q.id}" ondrop="drop(event)" ondragover="allowDrop(event)"></span>`)}
+                            </div>
+                            
+                            <div class="draggable-container">
+                                ${renderDraggableOptions(q.options, q.id)}
+                            </div>
+                        </div>
+                        <input type="hidden" id="q_${q.id}">
+                    `;
+                } 
+                // --- กรณี 2: แบบเลือกตอบเดิม ---
+                else if (q.type === 'choice' || q.type === 'multiple_choice') {
+                    html += `<div class="question-text">${index + 1}. ${q.question_text}</div>`;
+                    let options = JSON.parse(q.options);
+                    for (let key in options) {
+                        html += `
+                            <label class="option-label">
+                                <input type="radio" name="q_${q.id}" value="${options[key]}"> <span>${options[key]}</span>
+                            </label>`;
+                    }
+                } 
+                // --- กรณี 3: เติมคำ ---
+                else {
+                    html += `<div class="question-text">${index + 1}. ${q.question_text}</div>
+                             <input type="text" id="q_${q.id}" placeholder="พิมพ์คำตอบ...">`;
+                }
+
+                html += `</div>`;
+                area.innerHTML += html;
+            });
+        });
+
+    // ฟังก์ชันสร้างตัวเลือกสำหรับลาก
+    function renderDraggableOptions(optionsJson, qId) {
+        const options = JSON.parse(optionsJson);
+        let html = '';
+        for (let key in options) {
+            // draggable="true" คือหัวใจสำคัญ
+            html += `<div class="draggable-item" draggable="true" ondragstart="drag(event)" data-value="${options[key]}">
+                        ${options[key]}
+                     </div>`;
+        }
+        return html;
+    }
+
+    // --- Logic การลากวาง (Drag & Drop API) ---
+    
+    function allowDrop(ev) {
+        ev.preventDefault(); // อนุญาตให้วางได้
+        ev.target.classList.add('highlight');
+    }
+
+    function drag(ev) {
+        // ส่งข้อมูล text ของตัวที่ลากไปด้วย
+        ev.dataTransfer.setData("text", ev.target.getAttribute('data-value'));
+    }
+
+    function drop(ev) {
+        ev.preventDefault();
+        ev.target.classList.remove('highlight');
+        
+        // รับข้อมูลที่ส่งมา
+        var data = ev.dataTransfer.getData("text");
+        
+        // เอาข้อความใส่ในช่องว่าง
+        ev.target.innerText = data;
+        ev.target.classList.add('filled');
+
+        // เอาค่าไปใส่ใน input hidden เพื่อรอตรวจคำตอบ
+        // หา ID ของโจทย์จาก id ของ drop-zone (เช่น drop-5 -> 5)
+        const qId = ev.target.id.split('-')[1];
+        document.getElementById(`q_${qId}`).value = data;
+    }
+
+    // --- ฟังก์ชันตรวจคำตอบ (อัปเกรด) ---
+    function submitQuiz() {
+        let score = 0;
+        currentQuizzes.forEach(q => {
+            let userAnswer = '';
+            
+            if (q.type === 'drag_drop') {
+                // ดึงจาก input hidden ที่เราฝากค่าไว้
+                userAnswer = document.getElementById(`q_${q.id}`).value;
+            } 
+            else if (q.type === 'choice') {
+                const checked = document.querySelector(`input[name="q_${q.id}"]:checked`);
+                if (checked) userAnswer = checked.value;
+            } 
+            else {
+                userAnswer = document.getElementById(`q_${q.id}`).value;
+            }
+
+            // ตัดช่องว่างหน้าหลังแล้วเทียบ
+            if (userAnswer && userAnswer.trim() === q.correct_answer) {
+                score++;
+            }
+        });
+
+        // 1. ดึงข้อมูล User
+const user = JSON.parse(localStorage.getItem('user'));
+if (!user) return;
+
+// 2. ส่งคะแนนไปบันทึก
+fetch('/api/score', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+        userId: user.id, 
+        lessonId: lessonId, 
+        score: score 
+    })
+})
+.then(res => res.json())
+.then(data => {
+    alert(`🎉 คุณได้คะแนน ${score} / ${currentQuizzes.length}\n(บันทึกผลเรียบร้อย)`);
+    // บันทึกเสร็จค่อยเด้งกลับ Dashboard
+    window.location.href = 'student_dashboard.html';
+})
+.catch(err => {
+    console.error(err);
+    alert('เกิดข้อผิดพลาดในการบันทึกคะแนน');
+});
+    }
+</script>
+</body>
+</html>

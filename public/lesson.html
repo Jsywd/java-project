@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>ห้องเรียน - Java Master</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* สไตล์พิเศษเฉพาะหน้านี้ */
+        .content-container {
+            max-width: 900px; margin: 40px auto;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border-radius: 15px; padding: 40px;
+            color: #333;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            min-height: 60vh;
+        }
+        .content-container h1 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 15px; }
+        .back-btn { color: white; margin-right: 20px; font-size: 1.2rem; }
+        
+        /* ปรับแต่งกล่องโค้ดให้สวยขึ้น */
+        pre[class*="language-"] {
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="animated-bg"></div>
+
+    <nav class="navbar">
+        <div>
+            <a href="home.html" class="back-btn"><i class="fas fa-arrow-left"></i> กลับหน้าหลัก</a>
+            <span style="font-weight: bold; font-size: 1.2rem;">☕ Java Classroom</span>
+        </div>
+        <div id="user-display">Student</div>
+    </nav>
+
+    <div class="content-container">
+        <h1 id="title">กำลังโหลดบทเรียน...</h1>
+        <div id="content" style="line-height: 1.8; font-size: 1.1rem;">
+            <p>กรุณารอสักครู่...</p>
+        </div>
+    </div>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        // Check Login
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user) {
+            alert("🔒 กรุณาเข้าสู่ระบบก่อนเรียน");
+            window.location.href = 'login.html';
+            throw new Error("Unauthorized");
+        }
+        document.getElementById('user-display').innerText = user.username;
+
+        // Load Lesson
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+
+        fetch(`/api/lessons/${id}`)
+            .then(res => {
+                if(!res.ok) throw new Error();
+                return res.json();
+            })
+            .then(data => {
+                // แสดงเนื้อหา
+                document.getElementById('title').innerText = `บทที่ ${data.id}: ${data.title}`;
+                document.getElementById('content').innerHTML = data.content;
+                
+                // ✅ สั่งให้ระบายสีโค้ด (หลังจากเนื้อหามาแล้ว)
+                if (window.Prism) {
+                    Prism.highlightAll();
+                }
+            })
+            .catch(err => {
+                document.getElementById('title').innerText = "ไม่พบบทเรียน";
+                document.getElementById('content').innerHTML = "<p>ขออภัย ไม่มีเนื้อหาในบทเรียนนี้</p>";
+            });
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>

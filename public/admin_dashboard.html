@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard - Java Master</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { background-color: #e9efec; }
+
+        /* Navbar */
+        .admin-nav {
+            background: #16423c; padding: 15px 40px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 10px rgba(22,66,60,0.2); color: #e9efec;
+            position: sticky; top: 0; z-index: 100;
+        }
+        .admin-logo { font-size: 1.5rem; font-weight: bold; letter-spacing: 1px; }
+        .admin-logo span { color: #c4dad2; }
+
+        /* Layout */
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        .dashboard-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px; margin-bottom: 40px;
+        }
+
+        /* Stats Cards */
+        .stat-card {
+            background: white; padding: 30px; border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            display: flex; justify-content: space-between; align-items: center;
+            transition: transform 0.3s ease; border-left: 5px solid transparent;
+        }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .stat-info h3 { font-size: 3rem; margin: 0; color: #16423c; line-height: 1; }
+        .stat-info p { margin: 10px 0 0; color: #6a9c89; font-size: 1.1rem; }
+        .stat-icon { font-size: 3.5rem; opacity: 0.2; }
+        .card-users { border-left-color: #16423c; } .card-users .stat-icon { color: #16423c; }
+        .card-lessons { border-left-color: #6a9c89; } .card-lessons .stat-icon { color: #6a9c89; }
+        .card-add { 
+            border: 2px dashed #6a9c89; background: #e9efec; cursor: pointer; justify-content: center; flex-direction: column; text-align: center;
+        }
+        .card-add:hover { background: #c4dad2; border-color: #16423c; }
+        .card-add i { font-size: 3rem; color: #16423c; margin-bottom: 10px; opacity: 1; }
+
+        /* Tables */
+        .table-container {
+            background: white; padding: 30px; border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 40px;
+        }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #c4dad2; padding-bottom: 15px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 15px; background: #e9efec; color: #6a9c89; font-weight: 600; border-radius: 8px; }
+        td { padding: 15px; border-bottom: 1px solid #c4dad2; color: #16423c; vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #f0f5f3; }
+        .badge { padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+        .bg-admin { background: #c4dad2; color: #16423c; } .bg-student { background: #e9efec; color: #6a9c89; }
+        .action-btn { border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: 0.2s; font-size: 0.9rem; margin-right: 5px; }
+        .btn-edit { background: #c4dad2; color: #16423c; } .btn-delete { background: #f8d7da; color: #721c24; }
+
+        /* Form Modal */
+        .form-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 1000; backdrop-filter: blur(5px);
+        }
+        .form-box {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: white; padding: 40px; width: 90%; max-width: 700px;
+            border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-height: 90vh; overflow-y: auto;
+        }
+        
+        /* ✅ CSS ใหม่: ช่องพิมพ์โค้ดสวยๆ Fix ขนาด */
+        textarea {
+            width: 100%;
+            height: 350px; /* ล็อกความสูง */
+            resize: none;  /* ห้ามขยับ */
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 1rem;
+            line-height: 1.6;
+            background: #1e1e1e; /* สีดำ */
+            color: #c4dad2;      /* ตัวหนังสือ Mist */
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto; /* มี Scrollbar ถ้าเนื้อหาล้น */
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+        }
+        textarea:focus { outline: none; border-color: #00b894; }
+        
+        /* Scrollbar สวยๆ */
+        textarea::-webkit-scrollbar { width: 10px; }
+        textarea::-webkit-scrollbar-track { background: #1e1e1e; }
+        textarea::-webkit-scrollbar-thumb { background: #444; border-radius: 5px; }
+        textarea::-webkit-scrollbar-thumb:hover { background: #555; }
+
+        input { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 8px; box-sizing: border-box; }
+        input:focus { border-color: #00b894; outline: none; }
+
+    </style>
+</head>
+<body>
+
+    <nav class="admin-nav">
+        <div class="admin-logo"><i class="fas fa-shield-alt"></i> Admin <span>Panel</span></div>
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <span><i class="fas fa-user-tie"></i> Admin Mode</span>
+            <button onclick="logout()" class="action-btn btn-delete" style="background: #b0584a; color: white;">Logout</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        
+        <div class="dashboard-grid">
+            <div class="stat-card card-users">
+                <div class="stat-info"><h3 id="total-users">0</h3><p>สมาชิกทั้งหมด</p></div>
+                <i class="fas fa-users stat-icon"></i>
+            </div>
+            <div class="stat-card card-lessons">
+                <div class="stat-info"><h3 id="total-lessons">0</h3><p>บทเรียนในระบบ</p></div>
+                <i class="fas fa-book-open stat-icon"></i>
+            </div>
+            <div class="stat-card card-add" onclick="openForm()">
+                <i class="fas fa-plus-circle"></i><h4>สร้างบทเรียนใหม่</h4>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div class="section-header"><h3><i class="fas fa-book-open" style="color:#6a9c89; margin-right:10px;"></i>จัดการบทเรียน</h3></div>
+            <table>
+                <thead>
+                    <tr><th width="5%">#</th><th width="30%">หัวข้อ</th><th width="45%">คำอธิบาย</th><th width="20%">จัดการ</th></tr>
+                </thead>
+                <tbody id="lesson-table-body"><tr><td colspan="4" align="center">กำลังโหลด...</td></tr></tbody>
+            </table>
+        </div>
+
+        <div class="table-container">
+            <div class="section-header"><h3><i class="fas fa-users" style="color:#6a9c89; margin-right:10px;"></i>รายชื่อสมาชิก</h3></div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>ชื่อผู้ใช้</th>
+                        <th>อีเมล</th>
+                        <th>สถานะ</th>
+                        <th style="text-align: center;">จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody id="user-table-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="form-overlay" class="form-overlay">
+        <div class="form-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 id="form-title" style="margin:0; color:#16423c;"><i class="fas fa-pen" style="color:#6a9c89; margin-right:10px; font-size:1.2rem;"></i>เพิ่มบทเรียน</h2>
+                <button type="button" onclick="closeForm()" 
+                style="background: #f1f2f6; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;">
+                <i class="fas fa-times" style="color: #636e72; font-size: 1rem;"></i>
+                </button>
+            </div>
+            
+            <input type="hidden" id="l_id">
+            <div style="margin-bottom:15px;"><label>ลำดับ:</label><input type="number" id="l_order"></div>
+            <div style="margin-bottom:15px;"><label>ชื่อบทเรียน:</label><input type="text" id="l_title"></div>
+            <div style="margin-bottom:15px;"><label>คำอธิบายย่อ:</label><input type="text" id="l_desc"></div>
+            <div style="margin-bottom:20px;">
+                <label>เนื้อหา HTML (Content):</label>
+                <textarea id="l_content" placeholder="<p>เขียนเนื้อหาที่นี่...</p>"></textarea>
+                <small style="color:#666;">*แนะนำให้ใช้ &lt;p&gt;, &lt;h2&gt;, &lt;pre&gt;&lt;code&gt;</small>
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <button type="button" onclick="saveLesson()" style="flex:1; padding:12px; background:#16423c; color:#e9efec; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">บันทึก</button>
+                <button type="button" onclick="closeForm()" style="flex:1; padding:12px; background:#e9efec; color:#6a9c89; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user || user.role !== 'admin') { alert("Access Denied"); window.location.href = 'home.html'; throw new Error("Stop"); }
+
+        loadUsers(); loadLessons();
+
+        function loadUsers() {
+            fetch('/api/admin/users').then(res => res.json()).then(users => {
+                document.getElementById('total-users').innerText = users.length;
+                const tbody = document.getElementById('user-table-body');
+                tbody.innerHTML = '';
+                users.forEach(u => {
+                    tbody.innerHTML += `<tr>
+                        <td>#${u.id}</td>
+                        <td style="font-weight:600;">${u.username}</td>
+                        <td>${u.email}</td>
+                        <td><span class="badge ${u.role==='admin'?'bg-admin':'bg-student'}">${u.role.toUpperCase()}</span></td>
+                        
+                        <td style="text-align: center;">
+                            ${u.role !== 'admin' ? 
+                            `<button class="action-btn btn-delete" onclick="deleteUser(${u.id})"><i class="fas fa-trash-alt"></i></button>` : 
+                            '<span style="color:#ccc;">-</span>'}
+                        </td>
+                    </tr>`;
+                });
+            });
+        }
+
+        function loadLessons() {
+            fetch('/api/lessons').then(res => res.json()).then(lessons => {
+                document.getElementById('total-lessons').innerText = lessons.length;
+                const tbody = document.getElementById('lesson-table-body');
+                tbody.innerHTML = '';
+                lessons.forEach(l => {
+                    tbody.innerHTML += `<tr>
+                        <td><b>${l.id}</b></td><td style="font-weight:600; color:#2d3436;">${l.title}</td>
+                        <td style="color:#636e72; font-size:0.9rem;">${l.description || '-'}</td>
+                        <td>
+                            <button class="action-btn btn-edit" onclick="editLesson(${l.id})"><i class="fas fa-pencil-alt"></i></button>
+                            <button class="action-btn btn-delete" onclick="deleteLesson(${l.id})"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                    </tr>`;
+                });
+            });
+        }
+
+        function openForm() {
+            document.getElementById('form-overlay').style.display = 'block';
+            document.getElementById('form-title').innerHTML = '<i class="fas fa-pen" style="color:#6a9c89; margin-right:10px; font-size:1.2rem;"></i>เพิ่มบทเรียนใหม่';
+            ['l_id', 'l_title', 'l_desc', 'l_content', 'l_order'].forEach(id => document.getElementById(id).value = '');
+        }
+        function closeForm() { document.getElementById('form-overlay').style.display = 'none'; }
+
+        function editLesson(id) {
+            fetch(`/api/lessons/${id}`).then(res => res.json()).then(data => {
+                openForm();
+                document.getElementById('form-title').innerHTML = '<i class="fas fa-pencil-alt" style="color:#6a9c89; margin-right:10px; font-size:1.2rem;"></i>แก้ไขบทเรียน';
+                document.getElementById('l_id').value = data.id;
+                document.getElementById('l_title').value = data.title;
+                document.getElementById('l_desc').value = data.description;
+                document.getElementById('l_content').value = data.content;
+                document.getElementById('l_order').value = data.order_index;
+            });
+        }
+
+        function saveLesson() {
+            const id = document.getElementById('l_id').value;
+            const data = {
+                title: document.getElementById('l_title').value,
+                description: document.getElementById('l_desc').value,
+                content: document.getElementById('l_content').value,
+                order_index: document.getElementById('l_order').value
+            };
+            const url = id ? `/api/admin/lessons/${id}` : '/api/admin/lessons';
+            const method = id ? 'PUT' : 'POST';
+            fetch(url, { method: method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+            .then(res => res.json()).then(resData => {
+                if(resData.success) { closeForm(); loadLessons(); } else { alert("Error: " + resData.message); }
+            });
+        }
+
+        function deleteLesson(id) { if(confirm("⚠️ ลบบทเรียนนี้?")) fetch(`/api/admin/lessons/${id}`, { method: 'DELETE' }).then(() => loadLessons()); }
+        function deleteUser(id) { if(confirm("ยืนยันการลบ?")) fetch(`/api/admin/users/${id}`, { method: 'DELETE' }).then(() => loadUsers()); }
+        function logout() { localStorage.removeItem('user'); window.location.href = 'login.html'; }
+    </script>
+</body>
+</html>
