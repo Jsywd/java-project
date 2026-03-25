@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>แบบฝึกหัด - Java Master</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .quiz-container {
             max-width: 700px; margin: 40px auto;
@@ -12,18 +13,18 @@
         }
         .question-box {
             margin-bottom: 30px; padding-bottom: 20px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #c4dad2;
         }
         .question-text { font-size: 1.2rem; font-weight: 600; margin-bottom: 15px; color: var(--text-main); }
         
         /* Custom Radio Button ให้สวยๆ */
         .option-label {
             display: block; padding: 12px 15px; margin: 8px 0;
-            background: #f8f9fa; border-radius: 10px; cursor: pointer;
+            background: #e9efec; border-radius: 10px; cursor: pointer;
             transition: 0.2s; border: 2px solid transparent;
         }
-        .option-label:hover { background: #e9ecef; }
-        input[type="radio"]:checked + span { color: var(--primary); font-weight: bold; }
+        .option-label:hover { background: #c4dad2; }
+        input[type="radio"]:checked + span { color: #16423c; font-weight: bold; }
         input[type="radio"]:checked + span::before { content: "✔ "; }
         
         /* ซ่อนปุ่ม Radio เดิม */
@@ -33,13 +34,19 @@
 <body>
 
     <nav class="navbar">
-        <a href="home.html" class="back-btn">← ยกเลิก</a>
-        <span style="font-weight: bold;">📝 Quiz Time</span>
-        <div></div>
+        <div style="display:flex; align-items:center; gap:20px;">
+            <a href="student_dashboard.html" class="back-btn" style="display:inline-flex; align-items:center; gap:7px;">
+                <i class="fas fa-arrow-left"></i> กลับ Dashboard
+            </a>
+            <span style="font-weight:600; font-size:1rem; color:var(--text-main);">
+                <i class="fas fa-pencil-alt" style="color:#6a9c89; margin-right:6px;"></i>แบบฝึกหัด
+            </span>
+        </div>
+        <div id="user-display" style="font-size:0.85rem; font-weight:500; color:#6a9c89;"></div>
     </nav>
 
     <div class="quiz-container">
-        <h1 style="text-align: center; margin-bottom: 40px;">แบบฝึกหัดทบทวน</h1>
+        <h1 id="quiz-title" style="text-align:center; margin-bottom:40px; font-size:1.5rem; color:#16423c;">แบบฝึกหัดทบทวน</h1>
         
         <form id="quiz-form">
             <div id="questions-area">กำลังโหลดโจทย์...</div>
@@ -49,11 +56,22 @@
     </div>
 
     <script>
+    // แสดงชื่อ user บน navbar
+    const _u = JSON.parse(localStorage.getItem('user'));
+    if (_u) {
+        const el = document.getElementById('user-display');
+        if (el) el.innerHTML = `<i class="fas fa-user-circle" style="margin-right:5px;"></i>${_u.username}`;
+    }
+
     const urlParams = new URLSearchParams(window.location.search);
     const lessonId = urlParams.get('lessonId');
     let currentQuizzes = [];
 
     // ดึงโจทย์
+    // อัปเดตชื่อหัวข้อด้วย lessonId
+    const titleEl = document.getElementById('quiz-title');
+    if (titleEl && lessonId) titleEl.innerText = `แบบฝึกหัด — บทที่ ${lessonId}`;
+
     fetch(`/api/quizzes/${lessonId}`)
         .then(res => res.json())
         .then(data => {
